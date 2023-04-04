@@ -1,12 +1,16 @@
 package sg.edu.nus.IBFday22.model;
 
+import java.io.ByteArrayInputStream;
+
 import org.joda.time.DateTime;
+import org.joda.time.Instant;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import jakarta.json.JsonValue;
 
 public class RSVP {
@@ -91,11 +95,11 @@ public class RSVP {
         rsvp.setName(rs.getString("name"));
         rsvp.setEmail(rs.getString("email"));
         rsvp.setPhone(rs.getString("phone"));
-        rsvp.setConfirmationDate(new DateTime(DateTimeFormat.forPattern("dd/MM/yyyy")
-               .parseDateTime(rs.getString("confirmation_date"))));
+       // rsvp.setConfirmationDate(new DateTime(DateTimeFormat.forPattern("dd/MM/yyyy")
+           //    .parseDateTime(rs.getString("confirmation_date"))));
         
         //rsvp.setConfirmationDate(new DateTime(DateTime)rs.getString("confirmation_date"));
-      //  rsvp.setConfirmationDate(new DateTime(DateTime.parse(rs.getString("confirmation_date")))); 
+        rsvp.setConfirmationDate(new DateTime(DateTime.parse(rs.getString("confirmation_date")))); 
         rsvp.setComments(rs.getString("comments"));
         return rsvp;
     }
@@ -108,6 +112,25 @@ public class RSVP {
         .add("Confirmation_Date", getConfirmationDate().toString(DateTimeFormat.forPattern("dd-MM-yyyy")))
         .add("comment", getComments())
         .build();
+    }
+
+    
+
+    private static RSVP create(JsonObject readObject) {
+        RSVP rsvp = new RSVP();
+        rsvp.setName(readObject.getString("name"));
+        rsvp.setEmail(readObject.getString("email"));
+        rsvp.setPhone(readObject.getString("phone"));
+        rsvp.setConfirmationDate(new DateTime(Instant.parse(readObject.getString("confirmation_date"))));
+        rsvp.setComments(readObject.getString("comments"));
+        return rsvp;
+    }
+
+
+    
+    public static RSVP create(String json) {
+        JsonReader reader = Json.createReader(new ByteArrayInputStream(json.getBytes()));
+        return create(reader.readObject());
     }
 
 }

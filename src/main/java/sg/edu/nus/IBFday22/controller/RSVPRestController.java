@@ -73,13 +73,21 @@ public class RSVPRestController {
     }
 
 
-    @PostMapping(path = "/rsvp")
+    @PostMapping(path = "/rsvp", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> insertUpdateRSVP(@RequestBody String json){
-        RSVP rsvp = new RSVP();
-        rsvp = rsvp.create(json); //converting json to java object
+        RSVP rsvp = null;
+        JsonObject jsonObject = null;
+        try{
+        rsvp = RSVP.create(json); //converting json to java object
+        }catch(Exception e){
+         e.printStackTrace();
+        jsonObject = Json.createObjectBuilder().add("error", e.getMessage()).build();
+        return ResponseEntity.badRequest().body(jsonObject.toString());
+
+        }
         RSVP result = repository.createRsvp(rsvp);
 
-        JsonObject jsonObject = Json.createObjectBuilder()
+         jsonObject = Json.createObjectBuilder()
         .add("rsvpID", result.getId())
         .build();
  
