@@ -5,13 +5,12 @@ import java.io.ByteArrayInputStream;
 import org.joda.time.DateTime;
 import org.joda.time.Instant;
 import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonReader;
-import jakarta.json.JsonValue;
+
 
 public class RSVP {
     private Integer id;
@@ -20,6 +19,16 @@ public class RSVP {
     private String phone;
     private DateTime confirmationDate;
     private String comments;
+
+    private Integer totalCount;
+
+    public Integer getTotalCount() {
+        return totalCount;
+    }
+
+    public void setTotalCount(Integer totalCount) {
+        this.totalCount = totalCount;
+    }
 
     public RSVP() {
 

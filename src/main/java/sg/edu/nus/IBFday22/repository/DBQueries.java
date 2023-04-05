@@ -11,5 +11,7 @@ public class DBQueries {
 
     public static final String UPDATE_RSVP_BY_EMAIL = "update rsvp set name =?, phone =?, confirmation_date = ?, comments = ? where email = ?";
 
+    public static final String TOTAL_RSVP_COUNT = "select count(*) as total_count from rsvp";
+
     
 }

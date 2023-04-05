@@ -6,6 +6,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
 import sg.edu.nus.IBFday22.model.RSVP;
+import sg.edu.nus.IBFday22.model.RSVPTotalCountMapper;
+
 import static sg.edu.nus.IBFday22.repository.DBQueries.*;
 
 @Repository
@@ -107,7 +110,7 @@ public class RSVPRepository {
     return rsvp;
    }
 
-private boolean updateRSVP(RSVP existingRSVP) {
+public boolean updateRSVP(RSVP existingRSVP) {
 return jdbcTemplate.update(UPDATE_RSVP_BY_EMAIL, 
         existingRSVP.getName(),    
         existingRSVP.getPhone(), 
@@ -115,4 +118,5 @@ return jdbcTemplate.update(UPDATE_RSVP_BY_EMAIL,
         existingRSVP.getComments(),
         existingRSVP.getEmail()) > 0;
 }
+
 }
