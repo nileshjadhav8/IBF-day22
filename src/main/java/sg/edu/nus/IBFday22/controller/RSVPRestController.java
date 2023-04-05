@@ -123,4 +123,22 @@ public class RSVPRestController {
         .body(resp.toString());
     }
 
+    @GetMapping(path = "/rsvps/count")
+    public ResponseEntity<String> getTotalRSVPCounts(){
+
+        JsonObject resp;
+
+        Long total_rsvps = repository.getTotalRSVPCount();
+
+        resp = Json.createObjectBuilder()
+        .add("total_count", total_rsvps)
+        .build();
+
+        return ResponseEntity
+        .status(HttpStatus.OK)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(resp.toString()); 
+
+    }
+
 }

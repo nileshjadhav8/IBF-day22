@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -40,60 +41,60 @@ public class RSVPRepository {
         return rsvps;
     }
 
-    public List<RSVP> getRSVPByName(String name){
+    public List<RSVP> getRSVPByName(String name) {
         List<RSVP> rsvps = new ArrayList<RSVP>();
         SqlRowSet rs = null;
-        
-        rs= jdbcTemplate.queryForRowSet(SELECT_RSVP_BY_NAME, new Object[]{"%" + name +"%"});
+
+        rs = jdbcTemplate.queryForRowSet(SELECT_RSVP_BY_NAME, new Object[] { "%" + name + "%" });
 
         while (rs.next())
             rsvps.add(RSVP.create(rs));
         return rsvps;
-   }
-
-   private RSVP getRSVPByEmail(String email){
-    List<RSVP> rsvpList = new ArrayList<>();
-    SqlRowSet rs = jdbcTemplate.queryForRowSet(SELECT_RSVP_BY_EMAIL, email);
-
-
-    System.out.println("checking resultset ----> " +Objects.isNull(rs));
-
-    while(rs.next()){
-        System.out.println("inside while loop");
-        rsvpList.add(RSVP.create(rs));
     }
 
-    System.out.println("size of rsvp list ---- > "+rsvpList.size());
-    if(rsvpList.size() ==0) return null;
-    return rsvpList.get(0);
-   }
+    private RSVP getRSVPByEmail(String email) {
+        List<RSVP> rsvpList = new ArrayList<>();
+        SqlRowSet rs = jdbcTemplate.queryForRowSet(SELECT_RSVP_BY_EMAIL, email);
 
-   public RSVP createRsvp(RSVP rsvp){
-    KeyHolder keyHolder = new GeneratedKeyHolder();
-    RSVP existingRSVP = getRSVPByEmail(rsvp.getEmail());
+        System.out.println("checking resultset ----> " + Objects.isNull(rs));
 
-    if(Objects.isNull(existingRSVP)){
+        while (rs.next()) {
+            System.out.println("inside while loop");
+            rsvpList.add(RSVP.create(rs));
+        }
 
-        System.out.println("inside If loop--->");
-        //insert record
-        jdbcTemplate.update(conn -> {
-            PreparedStatement statement = conn.prepareStatement(INSERT_NEW_RSVP, Statement.RETURN_GENERATED_KEYS);
+        System.out.println("size of rsvp list ---- > " + rsvpList.size());
+        if (rsvpList.size() == 0)
+            return null;
+        return rsvpList.get(0);
+    }
 
-            statement.setString(1, rsvp.getName());
-            statement.setString(2, rsvp.getEmail());
-            statement.setString(3,rsvp.getPhone());
-            statement.setTimestamp(4, new Timestamp(rsvp.getConfirmationDate().toDateTime().getMillis()));
-            statement.setString(5, rsvp.getComments());
-            return statement;
-        }, keyHolder);
+    public RSVP createRsvp(RSVP rsvp) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        RSVP existingRSVP = getRSVPByEmail(rsvp.getEmail());
 
-        BigInteger primaryKey = (BigInteger) keyHolder.getKey();
+        if (Objects.isNull(existingRSVP)) {
 
-        rsvp.setId(primaryKey.intValue());
+            System.out.println("inside If loop--->");
+            // insert record
+            jdbcTemplate.update(conn -> {
+                PreparedStatement statement = conn.prepareStatement(INSERT_NEW_RSVP, Statement.RETURN_GENERATED_KEYS);
 
-    }else{
-        System.out.println("inside else loop--->");
-            //update existing record
+                statement.setString(1, rsvp.getName());
+                statement.setString(2, rsvp.getEmail());
+                statement.setString(3, rsvp.getPhone());
+                statement.setTimestamp(4, new Timestamp(rsvp.getConfirmationDate().toDateTime().getMillis()));
+                statement.setString(5, rsvp.getComments());
+                return statement;
+            }, keyHolder);
+
+            BigInteger primaryKey = (BigInteger) keyHolder.getKey();
+
+            rsvp.setId(primaryKey.intValue());
+
+        } else {
+            System.out.println("inside else loop--->");
+            // update existing record
             existingRSVP.setName(rsvp.getName());
             existingRSVP.setPhone(rsvp.getPhone());
             existingRSVP.setConfirmationDate(rsvp.getConfirmationDate());
@@ -101,22 +102,27 @@ public class RSVPRepository {
 
             boolean isUpdated = updateRSVP(existingRSVP);
 
-            if(isUpdated){
+            if (isUpdated) {
                 rsvp.setId(existingRSVP.getId());
             }
 
+        }
+
+        return rsvp;
     }
 
-    return rsvp;
-   }
+    public boolean updateRSVP(RSVP existingRSVP) {
+        return jdbcTemplate.update(UPDATE_RSVP_BY_EMAIL,
+                existingRSVP.getName(),
+                existingRSVP.getPhone(),
+                new Timestamp(existingRSVP.getConfirmationDate().toDateTime().getMillis()),
+                existingRSVP.getComments(),
+                existingRSVP.getEmail()) > 0;
+    }
 
-public boolean updateRSVP(RSVP existingRSVP) {
-return jdbcTemplate.update(UPDATE_RSVP_BY_EMAIL, 
-        existingRSVP.getName(),    
-        existingRSVP.getPhone(), 
-        new Timestamp(existingRSVP.getConfirmationDate().toDateTime().getMillis()), 
-        existingRSVP.getComments(),
-        existingRSVP.getEmail()) > 0;
-}
+    public Long getTotalRSVPCount() {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(TOTAL_RSVP_COUNT);
+        return (Long) rows.get(0).get("total_count");
+    }
 
 }
