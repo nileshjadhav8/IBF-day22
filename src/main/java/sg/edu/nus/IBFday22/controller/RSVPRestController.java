@@ -135,7 +135,7 @@ public class RSVPRestController {
         .build();
 
         return ResponseEntity
-        .status(HttpStatus.OK)
+        .status(HttpStatus.CREATED)
         .contentType(MediaType.APPLICATION_JSON)
         .body(resp.toString()); 
 
